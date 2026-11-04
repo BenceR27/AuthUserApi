@@ -1,23 +1,28 @@
 [
   {
-    "ContainingType": "AuthUserApi.Controllers.WeatherForecastController",
-    "Method": "Get",
-    "RelativePath": "WeatherForecast",
+    "ContainingType": "AuthUserApi.Controllers.UsersController",
+    "Method": "GetUsers",
+    "RelativePath": "users/getusers",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [],
-    "ReturnTypes": [
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AuthUserApi.Controllers.UsersController",
+    "Method": "NewUser",
+    "RelativePath": "users/newuser",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[AuthUserApi.WeatherForecast, AuthUserApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
+        "Name": "newUserDto",
+        "Type": "AuthUserApi.Models.DTOs.NewUserDto",
+        "IsRequired": true
       }
     ],
-    "EndpointName": "GetWeatherForecast"
+    "ReturnTypes": []
   }
 ]
