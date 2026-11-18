@@ -1,7 +1,11 @@
 
 using AuthUserApi.Models;
+using AuthUserApi.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using System.Text;
 
 namespace AuthUserApi
 {
@@ -13,7 +17,33 @@ namespace AuthUserApi
 
             builder.Services.AddDbContext<AuthuserContext>(options =>
                 options.UseMySQL(builder.Configuration.GetConnectionString("MySql"))
-                );
+            );
+
+            builder.Services.AddScoped<PasswordHasher>();
+            builder.Services.AddScoped<GenerateToken>();
+
+            var secret = "ide-jon-az-a-kulcs-amivel-azonositjuk-issuer-es-a-audience";
+            var issuer = "auth-api";
+            var audience = "auth-client";
+
+            var key = Encoding.ASCII.GetBytes(secret);
+
+            builder.Services.AddAuthentication(options => {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(jwt =>
+            {
+                jwt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    ValidIssuer = issuer,
+                    ValidAudience = audience,
+                    ValidateAudience = true
+                };
+            });
+
 
             // Add services to the container.
 
@@ -32,6 +62,7 @@ namespace AuthUserApi
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

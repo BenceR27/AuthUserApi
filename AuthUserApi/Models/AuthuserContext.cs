@@ -19,70 +19,51 @@ public partial class AuthuserContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySQL("server=localhost;database=authuser;user=root;password=");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Role>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("roles");
+            entity.ToTable("Roles", "AuthUser");
 
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Name)
-                .HasMaxLength(40)
-                .HasDefaultValueSql("'NULL'")
-                .IsFixedLength()
-                .HasColumnName("name");
-            entity.Property(e => e.Regtime)
-                .HasDefaultValueSql("'current_timestamp()'")
-                .HasColumnType("datetime")
-                .HasColumnName("regtime");
+            entity.HasIndex(e => e.Name, "Name").IsUnique();
+
+            entity.Property(e => e.Name).HasMaxLength(40);
+            entity.Property(e => e.RegTime)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("datetime");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("users");
+            entity.ToTable("Users", "AuthUser");
 
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Email)
-                .HasMaxLength(50)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnName("email");
-            entity.Property(e => e.Name)
-                .HasMaxLength(40)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnName("name");
-            entity.Property(e => e.Password)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnType("text")
-                .HasColumnName("password");
-            entity.Property(e => e.Regtime)
-                .HasDefaultValueSql("'current_timestamp()'")
-                .HasColumnType("datetime")
-                .HasColumnName("regtime");
+            entity.Property(e => e.Email).HasMaxLength(50);
+            entity.Property(e => e.Name).HasMaxLength(40);
+            entity.Property(e => e.Password).HasColumnType("text");
+            entity.Property(e => e.RegTime)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Salt).HasColumnType("text");
 
             entity.HasMany(d => d.Roles).WithMany(p => p.Users)
                 .UsingEntity<Dictionary<string, object>>(
-                    "Userrole",
+                    "UserRole",
                     r => r.HasOne<Role>().WithMany()
                         .HasForeignKey("RoleId")
                         .HasConstraintName("userrole_ibfk_2"),
                     l => l.HasOne<User>().WithMany()
-                        .HasForeignKey("Userid")
+                        .HasForeignKey("UserId")
                         .HasConstraintName("userrole_ibfk_1"),
                     j =>
                     {
-                        j.HasKey("Userid", "RoleId").HasName("PRIMARY");
-                        j.ToTable("userrole");
+                        j.HasKey("UserId", "RoleId").HasName("PRIMARY");
+                        j.ToTable("UserRole", "AuthUser");
                         j.HasIndex(new[] { "RoleId" }, "RoleId");
-                        j.HasIndex(new[] { "Userid", "RoleId" }, "userid");
-                        j.IndexerProperty<Guid>("Userid").HasColumnName("userid");
+                        j.HasIndex(new[] { "UserId", "RoleId" }, "UserId");
                     });
         });
 
